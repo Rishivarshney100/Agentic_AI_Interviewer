@@ -228,10 +228,3 @@ npm run lint
 ## 📝 License
 
 This project is open source and available under the [MIT License](LICENSE).
-
----
-
-<div align="center">
-  <p>Built with ❤️ using Next.js and AI</p>
-  <p>Made by <strong>Rishi Varshney</strong></p>
-</div>
