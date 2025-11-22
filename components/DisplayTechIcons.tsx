@@ -1,13 +1,13 @@
 import Image from "next/image";
 
-import { cn, getTechLogos } from "@/lib/utils";
+import { cn, getTechnologyLogos } from "@/lib/utils";
 
-const DisplayTechIcons = async ({ techStack }: TechIconProps) => {
-  const techIcons = await getTechLogos(techStack);
+const TechnologyBadges = async ({ technicalStack }: TechnologyIconProps) => {
+  const technologyIcons = await getTechnologyLogos(technicalStack);
 
   return (
     <div className="flex flex-row">
-      {techIcons.slice(0, 3).map(({ tech, url }, index) => (
+      {technologyIcons.slice(0, 3).map(({ tech, url }, index) => (
         <div
           key={tech}
           className={cn(
@@ -30,4 +30,4 @@ const DisplayTechIcons = async ({ techStack }: TechIconProps) => {
   );
 };
 
-export default DisplayTechIcons;
+export default TechnologyBadges;

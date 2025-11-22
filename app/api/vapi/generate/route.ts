@@ -5,11 +5,11 @@ import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
 
 export async function POST(request: Request) {
-  const { type, role, level, techstack, amount, userid } = await request.json();
+  const { type, role, level, techstack, amount, userId } = await request.json();
 
   try {
     const { text: questions } = await generateText({
-      model: google("gemini-2.0-flash-001"),
+      model: google("gemini-2.0-flash-001") as any,
       prompt: `Prepare questions for a job interview.
         The job role is ${role}.
         The job experience level is ${level}.
@@ -26,18 +26,18 @@ export async function POST(request: Request) {
     });
 
     const interview = {
-      role: role,
-      type: type,
-      level: level,
-      techstack: techstack.split(","),
-      questions: JSON.parse(questions),
-      userId: userid,
-      finalized: true,
+      position: role,
+      interviewType: type,
+      experienceLevel: level,
+      technicalStack: techstack.split(","),
+      queryList: JSON.parse(questions),
+      userId: userId,
+      isCompleted: true,
       coverImage: getRandomInterviewCover(),
       createdAt: new Date().toISOString(),
     };
 
-    await db.collection("interviews").add(interview);
+    await db.collection("sessions").add(interview);
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {

@@ -1,59 +1,59 @@
-interface Feedback {
+interface InterviewEvaluation {
   id: string;
-  interviewId: string;
-  totalScore: number;
-  categoryScores: Array<{
+  sessionId: string;
+  overallRating: number;
+  performanceMetrics: Array<{
     name: string;
     score: number;
     comment: string;
   }>;
-  strengths: string[];
-  areasForImprovement: string[];
-  finalAssessment: string;
+  keyStrengths: string[];
+  improvementAreas: string[];
+  detailedSummary: string;
   createdAt: string;
 }
 
-interface Interview {
+interface InterviewSession {
   id: string;
-  role: string;
-  level: string;
-  questions: string[];
-  techstack: string[];
+  position: string;
+  experienceLevel: string;
+  queryList: string[];
+  technicalStack: string[];
   createdAt: string;
   userId: string;
-  type: string;
-  finalized: boolean;
+  interviewType: string;
+  isCompleted: boolean;
 }
 
-interface CreateFeedbackParams {
-  interviewId: string;
+interface CreateEvaluationParams {
+  sessionId: string;
   userId: string;
-  transcript: { role: string; content: string }[];
-  feedbackId?: string;
+  conversationHistory: { role: string; content: string }[];
+  evaluationId?: string;
 }
 
-interface User {
+interface AppUser {
   name: string;
   email: string;
   id: string;
 }
 
-interface InterviewCardProps {
-  interviewId?: string;
+interface SessionCardProps {
+  sessionId?: string;
   userId?: string;
-  role: string;
-  type: string;
-  techstack: string[];
+  position: string;
+  interviewType: string;
+  technicalStack: string[];
   createdAt?: string;
 }
 
-interface AgentProps {
-  userName: string;
+interface VoiceAgentProps {
+  candidateName: string;
   userId?: string;
-  interviewId?: string;
-  feedbackId?: string;
-  type: "generate" | "interview";
-  questions?: string[];
+  sessionId?: string;
+  evaluationId?: string;
+  mode: "generate" | "interview";
+  queryList?: string[];
 }
 
 interface RouteParams {
@@ -61,12 +61,12 @@ interface RouteParams {
   searchParams: Promise<Record<string, string>>;
 }
 
-interface GetFeedbackByInterviewIdParams {
-  interviewId: string;
+interface GetEvaluationBySessionIdParams {
+  sessionId: string;
   userId: string;
 }
 
-interface GetLatestInterviewsParams {
+interface GetLatestSessionsParams {
   userId: string;
   limit?: number;
 }
@@ -85,15 +85,15 @@ interface SignUpParams {
 
 type FormType = "sign-in" | "sign-up";
 
-interface InterviewFormProps {
-  interviewId: string;
-  role: string;
-  level: string;
-  type: string;
-  techstack: string[];
-  amount: number;
+interface SessionConfigProps {
+  sessionId: string;
+  position: string;
+  experienceLevel: string;
+  interviewType: string;
+  technicalStack: string[];
+  questionCount: number;
 }
 
-interface TechIconProps {
-  techStack: string[];
+interface TechnologyIconProps {
+  technicalStack: string[];
 }

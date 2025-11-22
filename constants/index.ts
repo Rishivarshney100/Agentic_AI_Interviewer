@@ -97,10 +97,10 @@ export const mappings = {
   "aws amplify": "amplify",
 };
 
-export const interviewer: CreateAssistantDTO = {
-  name: "Interviewer",
+export const aiInterviewerConfig: CreateAssistantDTO = {
+  name: "AI Hiring Manager",
   firstMessage:
-    "Hello! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience.",
+    "Hello! Thank you for joining me today. I'm excited to learn more about your background and experience.",
   transcriber: {
     provider: "deepgram",
     model: "nova-2",
@@ -112,45 +112,45 @@ export const interviewer: CreateAssistantDTO = {
   },
   model: {
     provider: "groq",
-    model: "llama-3.1-70b-versatile",
+    model: "llama-3.3-70b-versatile",
     messages: [
       {
         role: "system",
-        content: `You are a professional job interviewer conducting a real-time voice interview with a candidate. Your goal is to assess their qualifications, motivation, and fit for the role.
+        content: `You are conducting a live voice-based job interview with a prospective candidate. Your objective is to evaluate their suitability, skills, and cultural alignment.
 
-Interview Guidelines:
-Follow the structured question flow:
+Session Structure:
+Refer to the following question sequence:
 {{questions}}
 
-Engage naturally & react appropriately:
-Listen actively to responses and acknowledge them before moving forward.
-Ask brief follow-up questions if a response is vague or requires more detail.
-Keep the conversation flowing smoothly while maintaining control.
-Be professional, yet warm and welcoming:
+Interaction Approach:
+Respond thoughtfully to candidate answers and provide acknowledgment.
+Probe deeper if responses lack substance or clarity.
+Maintain a smooth conversational flow while staying focused.
+Professional yet approachable demeanor:
 
-Use official yet friendly language.
-Keep responses concise and to the point (like in a real voice interview).
-Avoid robotic phrasing—sound natural and conversational.
-Answer the candidate's questions professionally:
+Use clear, professional language with a friendly tone.
+Keep your responses brief and conversational (as in actual voice interviews).
+Avoid mechanical or scripted responses—be authentic.
+Address candidate inquiries professionally:
 
-If asked about the role, company, or expectations, provide a clear and relevant answer.
-If unsure, redirect the candidate to HR for more details.
+Provide informative responses about the position and organization when asked.
+If uncertain about details, suggest connecting with the HR team.
 
-Conclude the interview properly:
-Thank the candidate for their time.
-Inform them that the company will reach out soon with feedback.
-End the conversation on a polite and positive note.
+Wrap-up protocol:
+Express appreciation for the candidate's participation.
+Let them know the organization will follow up shortly.
+Conclude the session cordially.
 
 
-- Be sure to be professional and polite.
-- Keep all your responses short and simple. Use official language, but be kind and welcoming.
-- This is a voice conversation, so keep your responses short, like in a real conversation. Don't ramble for too long.`,
+- Maintain professionalism throughout.
+- Keep statements concise and direct. Use formal but approachable language.
+- Since this is a voice interaction, maintain brevity as in authentic conversations.`,
       },
     ],
   },
 };
 
-export const feedbackSchema = z.object({
+export const evaluationCriteriaSchema = z.object({
   totalScore: z.number(),
   categoryScores: z.tuple([
     z.object({
@@ -199,27 +199,27 @@ export const interviewCovers = [
   "/yahoo.png",
 ];
 
-export const dummyInterviews: Interview[] = [
+export const mockSessionData: InterviewSession[] = [
   {
     id: "1",
-    userId: "user1",
-    role: "Frontend Developer",
-    type: "Technical",
-    techstack: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
-    level: "Junior",
-    questions: ["What is React?"],
-    finalized: false,
+    userId: "guest",
+    position: "Frontend Developer",
+    interviewType: "Technical",
+    technicalStack: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
+    experienceLevel: "Junior",
+    queryList: ["What is React?"],
+    isCompleted: false,
     createdAt: "2024-03-15T10:00:00Z",
   },
   {
     id: "2",
-    userId: "user1",
-    role: "Full Stack Developer",
-    type: "Mixed",
-    techstack: ["Node.js", "Express", "MongoDB", "React"],
-    level: "Senior",
-    questions: ["What is Node.js?"],
-    finalized: false,
+    userId: "guest",
+    position: "Full Stack Developer",
+    interviewType: "Mixed",
+    technicalStack: ["Node.js", "Express", "MongoDB", "React"],
+    experienceLevel: "Senior",
+    queryList: ["What is Node.js?"],
+    isCompleted: false,
     createdAt: "2024-03-14T15:30:00Z",
   },
 ];

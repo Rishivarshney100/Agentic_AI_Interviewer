@@ -4,42 +4,40 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import {
-  getFeedbackByInterviewId,
-  getInterviewById,
+  getEvaluationBySessionId,
+  getSessionById,
 } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/lib/actions/auth.action";
 
-const Feedback = async ({ params }: RouteParams) => {
+const EvaluationResults = async ({ params }: RouteParams) => {
   const { id } = await params;
-  const user = await getCurrentUser();
 
-  const interview = await getInterviewById(id);
-  if (!interview) redirect("/");
+  const sessionData = await getSessionById(id);
+  if (!sessionData) redirect("/");
 
-  const feedback = await getFeedbackByInterviewId({
-    interviewId: id,
-    userId: user?.id!,
+  const evaluation = await getEvaluationBySessionId({
+    sessionId: id,
+    userId: "guest",
   });
 
   return (
     <section className="section-feedback">
       <div className="flex flex-row justify-center">
         <h1 className="text-4xl font-semibold">
-          Feedback on the Interview -{" "}
-          <span className="capitalize">{interview.role}</span> Interview
+          Performance Assessment -{" "}
+          <span className="capitalize">{sessionData.position}</span> Interview
         </h1>
       </div>
 
       <div className="flex flex-row justify-center ">
         <div className="flex flex-row gap-5">
-          {/* Overall Impression */}
+          {/* Overall Rating */}
           <div className="flex flex-row gap-2 items-center">
             <Image src="/star.svg" width={22} height={22} alt="star" />
             <p>
-              Overall Impression:{" "}
+              Overall Performance:{" "}
               <span className="text-primary-200 font-bold">
-                {feedback?.totalScore}
+                {evaluation?.overallRating}
               </span>
               /100
             </p>
@@ -49,8 +47,8 @@ const Feedback = async ({ params }: RouteParams) => {
           <div className="flex flex-row gap-2">
             <Image src="/calendar.svg" width={22} height={22} alt="calendar" />
             <p>
-              {feedback?.createdAt
-                ? dayjs(feedback.createdAt).format("MMM D, YYYY h:mm A")
+              {evaluation?.createdAt
+                ? dayjs(evaluation.createdAt).format("MMM D, YYYY h:mm A")
                 : "N/A"}
             </p>
           </div>
@@ -59,34 +57,34 @@ const Feedback = async ({ params }: RouteParams) => {
 
       <hr />
 
-      <p>{feedback?.finalAssessment}</p>
+      <p>{evaluation?.detailedSummary}</p>
 
-      {/* Interview Breakdown */}
+      {/* Performance Analysis */}
       <div className="flex flex-col gap-4">
-        <h2>Breakdown of the Interview:</h2>
-        {feedback?.categoryScores?.map((category, index) => (
+        <h2>Detailed Performance Metrics:</h2>
+        {evaluation?.performanceMetrics?.map((metric, index) => (
           <div key={index}>
             <p className="font-bold">
-              {index + 1}. {category.name} ({category.score}/100)
+              {index + 1}. {metric.name} ({metric.score}/100)
             </p>
-            <p>{category.comment}</p>
+            <p>{metric.comment}</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3>Strengths</h3>
+        <h3>Key Strengths</h3>
         <ul>
-          {feedback?.strengths?.map((strength, index) => (
+          {evaluation?.keyStrengths?.map((strength, index) => (
             <li key={index}>{strength}</li>
           ))}
         </ul>
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3>Areas for Improvement</h3>
+        <h3>Improvement Opportunities</h3>
         <ul>
-          {feedback?.areasForImprovement?.map((area, index) => (
+          {evaluation?.improvementAreas?.map((area, index) => (
             <li key={index}>{area}</li>
           ))}
         </ul>
@@ -96,7 +94,7 @@ const Feedback = async ({ params }: RouteParams) => {
         <Button className="btn-secondary flex-1">
           <Link href="/" className="flex w-full justify-center">
             <p className="text-sm font-semibold text-primary-200 text-center">
-              Back to dashboard
+              Return Home
             </p>
           </Link>
         </Button>
@@ -107,7 +105,7 @@ const Feedback = async ({ params }: RouteParams) => {
             className="flex w-full justify-center"
           >
             <p className="text-sm font-semibold text-black text-center">
-              Retake Interview
+              Practice Again
             </p>
           </Link>
         </Button>
@@ -116,4 +114,4 @@ const Feedback = async ({ params }: RouteParams) => {
   );
 };
 
-export default Feedback;
+export default EvaluationResults;

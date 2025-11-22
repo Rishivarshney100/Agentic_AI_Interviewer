@@ -6,218 +6,237 @@ import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
-import { interviewer } from "@/constants";
-import { createFeedback } from "@/lib/actions/general.action";
+import { aiInterviewerConfig } from "@/constants";
+import { generateEvaluation } from "@/lib/actions/general.action";
 
-enum CallStatus {
-  INACTIVE = "INACTIVE",
-  CONNECTING = "CONNECTING",
-  ACTIVE = "ACTIVE",
-  FINISHED = "FINISHED",
+enum ConnectionState {
+  IDLE = "IDLE",
+  ESTABLISHING = "ESTABLISHING",
+  CONNECTED = "CONNECTED",
+  TERMINATED = "TERMINATED",
 }
 
-interface SavedMessage {
+interface DialogEntry {
   role: "user" | "system" | "assistant";
   content: string;
 }
 
-const Agent = ({
-  userName,
+const VoiceInterviewer = ({
+  candidateName,
   userId,
-  interviewId,
-  feedbackId,
-  type,
-  questions,
-}: AgentProps) => {
-  const router = useRouter();
-  const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
-  const [messages, setMessages] = useState<SavedMessage[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [lastMessage, setLastMessage] = useState<string>("");
+  sessionId,
+  evaluationId,
+  mode,
+  queryList,
+}: VoiceAgentProps) => {
+  const navigation = useRouter();
+  const [connectionState, setConnectionState] = useState<ConnectionState>(ConnectionState.IDLE);
+  const [dialogHistory, setDialogHistory] = useState<DialogEntry[]>([]);
+  const [agentSpeaking, setAgentSpeaking] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState<string>("");
 
   useEffect(() => {
-    const onCallStart = () => {
-      setCallStatus(CallStatus.ACTIVE);
+    const handleConnectionEstablished = () => {
+      setConnectionState(ConnectionState.CONNECTED);
     };
 
-    const onCallEnd = () => {
-      setCallStatus(CallStatus.FINISHED);
+    const handleConnectionClosed = () => {
+      setConnectionState(ConnectionState.TERMINATED);
     };
 
-    const onMessage = (message: Message) => {
-      if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = { role: message.role, content: message.transcript };
-        setMessages((prev) => [...prev, newMessage]);
+    const handleIncomingMessage = (msg: Message) => {
+      if (msg.type === "transcript" && msg.transcriptType === "final") {
+        const dialogEntry = { role: msg.role, content: msg.transcript };
+        setDialogHistory((previous) => [...previous, dialogEntry]);
       }
     };
 
-    const onSpeechStart = () => {
-      console.log("speech start");
-      setIsSpeaking(true);
+    const handleAgentSpeechStart = () => {
+      console.log("Agent started speaking");
+      setAgentSpeaking(true);
     };
 
-    const onSpeechEnd = () => {
-      console.log("speech end");
-      setIsSpeaking(false);
+    const handleAgentSpeechEnd = () => {
+      console.log("Agent stopped speaking");
+      setAgentSpeaking(false);
     };
 
-    const onError = (error: Error) => {
-      console.log("Error:", error);
+    const handleConnectionError = (err: Error) => {
+      console.log("Connection error:", err);
     };
 
-    vapi.on("call-start", onCallStart);
-    vapi.on("call-end", onCallEnd);
-    vapi.on("message", onMessage);
-    vapi.on("speech-start", onSpeechStart);
-    vapi.on("speech-end", onSpeechEnd);
-    vapi.on("error", onError);
+    vapi.on("call-start", handleConnectionEstablished);
+    vapi.on("call-end", handleConnectionClosed);
+    vapi.on("message", handleIncomingMessage);
+    vapi.on("speech-start", handleAgentSpeechStart);
+    vapi.on("speech-end", handleAgentSpeechEnd);
+    vapi.on("error", handleConnectionError);
 
     return () => {
-      vapi.off("call-start", onCallStart);
-      vapi.off("call-end", onCallEnd);
-      vapi.off("message", onMessage);
-      vapi.off("speech-start", onSpeechStart);
-      vapi.off("speech-end", onSpeechEnd);
-      vapi.off("error", onError);
+      vapi.off("call-start", handleConnectionEstablished);
+      vapi.off("call-end", handleConnectionClosed);
+      vapi.off("message", handleIncomingMessage);
+      vapi.off("speech-start", handleAgentSpeechStart);
+      vapi.off("speech-end", handleAgentSpeechEnd);
+      vapi.off("error", handleConnectionError);
     };
   }, []);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      setLastMessage(messages[messages.length - 1].content);
+    if (dialogHistory.length > 0) {
+      setCurrentMessage(dialogHistory[dialogHistory.length - 1].content);
     }
 
-    const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-      console.log("handleGenerateFeedback");
+    const processSessionEvaluation = async (history: DialogEntry[]) => {
+      console.log("Processing session evaluation");
 
-      const { success, feedbackId: id } = await createFeedback({
-        interviewId: interviewId!,
+      const { success, feedbackId: evalId } = await generateEvaluation({
+        sessionId: sessionId!,
         userId: userId!,
-        transcript: messages,
-        feedbackId,
+        conversationHistory: history,
+        evaluationId,
       });
 
-      if (success && id) {
-        router.push(`/interview/${interviewId}/feedback`);
+      if (success && evalId) {
+        navigation.push(`/interview/${sessionId}/feedback`);
       } else {
-        console.log("Error saving feedback");
-        router.push("/");
+        console.log("Failed to save evaluation");
+        navigation.push("/");
       }
     };
 
-    if (callStatus === CallStatus.FINISHED) {
-      if (type === "generate") {
-        router.push("/");
+    if (connectionState === ConnectionState.TERMINATED) {
+      if (mode === "generate") {
+        navigation.push("/");
       } else {
-        handleGenerateFeedback(messages);
+        processSessionEvaluation(dialogHistory);
       }
     }
-  }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
+  }, [dialogHistory, connectionState, evaluationId, sessionId, navigation, mode, userId]);
 
-  const handleCall = async () => {
-    setCallStatus(CallStatus.CONNECTING);
+  const initiateConnection = async () => {
+    setConnectionState(ConnectionState.ESTABLISHING);
 
-    if (type === "generate") {
+    if (mode === "generate") {
       await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
         variableValues: {
-          username: userName,
+          username: candidateName,
           userid: userId,
         },
       });
     } else {
-      let formattedQuestions = "";
-      if (questions) {
-        formattedQuestions = questions
-          .map((question) => `- ${question}`)
+      let structuredQueries = "";
+      if (queryList) {
+        structuredQueries = queryList
+          .map((query) => `- ${query}`)
           .join("\n");
       }
 
-      await vapi.start(interviewer, {
+      await vapi.start(aiInterviewerConfig, {
         variableValues: {
-          questions: formattedQuestions,
+          questions: structuredQueries,
         },
       });
     }
   };
 
-  const handleDisconnect = () => {
-    setCallStatus(CallStatus.FINISHED);
+  const terminateConnection = () => {
+    setConnectionState(ConnectionState.TERMINATED);
     vapi.stop();
   };
 
   return (
-    <>
-      <div className="call-view">
+    <div className="w-full flex flex-col items-center space-y-8">
+      {/* Interview Cards */}
+      <div className="grid grid-cols-2 gap-6 w-full max-w-4xl">
         {/* AI Interviewer Card */}
-        <div className="card-interviewer">
-          <div className="avatar">
-            <Image
-              src="/ai-avatar.png"
-              alt="profile-image"
-              width={65}
-              height={54}
-              className="object-cover"
-            />
-            {isSpeaking && <span className="animate-speak" />}
+        <div className="relative bg-[#0f1e35] border border-[#1e3a5f] rounded-2xl p-12 flex flex-col items-center justify-center space-y-6 min-h-[320px] hover:border-[#2e4a6f] transition-all">
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/50">
+              <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
+              </svg>
+            </div>
+            {agentSpeaking && (
+              <span className="absolute inset-0 w-32 h-32 rounded-full border-4 border-purple-400 animate-ping" />
+            )}
           </div>
-          <h3>AI Interviewer</h3>
+          <h3 className="text-2xl font-semibold text-white">AI Interviewer</h3>
         </div>
 
         {/* User Profile Card */}
-        <div className="card-border">
-          <div className="card-content">
-            <Image
-              src="/user-avatar.png"
-              alt="profile-image"
-              width={539}
-              height={539}
-              className="rounded-full object-cover size-[120px]"
-            />
-            <h3>{userName}</h3>
+        <div className="relative bg-[#0f1e35] border border-[#1e3a5f] rounded-2xl p-12 flex flex-col items-center justify-center space-y-6 min-h-[320px] hover:border-[#2e4a6f] transition-all">
+          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-300 to-orange-400 flex items-center justify-center shadow-lg shadow-orange-400/50">
+            <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
           </div>
+          <h3 className="text-2xl font-semibold text-white">{candidateName}</h3>
         </div>
       </div>
 
-      {messages.length > 0 && (
-        <div className="transcript-border">
-          <div className="transcript">
+      {/* Conversation Display */}
+      {dialogHistory.length > 0 && (
+        <div className="w-full max-w-2xl">
+          <div className="bg-[#0f1e35] border border-[#1e3a5f] rounded-xl px-8 py-4">
             <p
-              key={lastMessage}
+              key={currentMessage}
               className={cn(
-                "transition-opacity duration-500 opacity-0",
+                "text-gray-300 text-center transition-opacity duration-500 opacity-0",
                 "animate-fadeIn opacity-100"
               )}
             >
-              {lastMessage}
+              {currentMessage}
             </p>
           </div>
         </div>
       )}
 
-      <div className="w-full flex justify-center">
-        {callStatus !== "ACTIVE" ? (
-          <button className="relative btn-call" onClick={() => handleCall()}>
-            <span
-              className={cn(
-                "absolute animate-ping rounded-full opacity-75",
-                callStatus !== "CONNECTING" && "hidden"
-              )}
-            />
-
-            <span className="relative">
-              {callStatus === "INACTIVE" || callStatus === "FINISHED"
-                ? "Call"
-                : ". . ."}
+      {/* Call to Action */}
+      <div className="flex flex-col items-center space-y-6">
+        {connectionState === "IDLE" && !dialogHistory.length && (
+          <p className="text-gray-400 text-lg">
+            Alright, {candidateName.split(' ')[0]}. Should we start ?
+          </p>
+        )}
+        
+        {connectionState !== "CONNECTED" ? (
+          <button 
+            className="group relative px-10 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-lg font-semibold rounded-full shadow-lg shadow-green-500/50 transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => initiateConnection()}
+            disabled={connectionState === "ESTABLISHING"}
+          >
+            <span className={cn(
+              connectionState === "ESTABLISHING" && "opacity-0"
+            )}>
+              {connectionState === "IDLE" || connectionState === "TERMINATED"
+                ? "Start Interview"
+                : "Connecting"}
             </span>
+            {connectionState === "IDLE" || connectionState === "TERMINATED" ? (
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            ) : (
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
+                <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
+                <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+              </div>
+            )}
           </button>
         ) : (
-          <button className="btn-disconnect" onClick={() => handleDisconnect()}>
-            End
+          <button 
+            className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white text-lg font-semibold rounded-full shadow-lg shadow-red-600/50 transition-all"
+            onClick={() => terminateConnection()}
+          >
+            End Interview
           </button>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
-export default Agent;
+export default VoiceInterviewer;

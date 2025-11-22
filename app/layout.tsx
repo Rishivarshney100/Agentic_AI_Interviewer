@@ -12,7 +12,7 @@ const monaSans = Mona_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "PrepWise - AI Mock Interviews",
+  title: "MockAI - AI Mock Interviews",
   description: "Practice mock interviews with AI-powered voice interviewer",
 };
 
@@ -23,16 +23,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${monaSans.className} antialiased pattern`}>
-        <div className="root-layout">
-          <nav>
-            <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="PrepWise Logo" width={38} height={32} />
-              <h2 className="text-primary-100">PrepWise</h2>
+      <body className={`${monaSans.className} antialiased`}>
+        <div className="min-h-screen bg-[#0a1628]">
+          <nav className="flex items-center justify-between px-16 py-6 max-w-[1400px] mx-auto">
+            <Link href="/" className="flex items-center gap-3">
+              <Image src="/logo.svg" alt="MockAI Logo" width={32} height={32} />
+              <span className="text-2xl font-semibold text-white">MockAI</span>
             </Link>
+            
+            <div className="flex items-center gap-8">
+              <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+                Features
+              </Link>
+              <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+                Pricing
+              </Link>
+              <Link href="https://github.com/Rishivarshney100/Agentic_AI_Interviewer" target="_blank" className="text-gray-300 hover:text-white transition-colors">
+                GitHub
+              </Link>
+              <button className="px-6 py-2 rounded-full border border-gray-600 text-white hover:border-gray-400 transition-colors">
+                Sign In
+              </button>
+            </div>
           </nav>
 
-          {children}
+          <main className="max-w-[1200px] mx-auto px-8 py-12">
+            {children}
+          </main>
         </div>
 
         <Toaster />

@@ -1,17 +1,23 @@
-import Agent from "@/components/Agent";
+import VoiceInterviewer from "@/components/Agent";
 
 export default function Home() {
   return (
-    <>
-      <h3>AI Mock Interview</h3>
+    <div className="flex flex-col items-center text-center space-y-12">
+      <div className="space-y-6 max-w-4xl">
+        <h1 className="text-6xl font-bold text-white tracking-tight">
+          AI Mock Interviews
+        </h1>
+        <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          "Ace your next interview with our open-source, voice-based AI." <br></br> Practice, get feedback, and land your dream job.
+        </p>
+      </div>
 
-      <Agent
-        userName="Guest User"
+      <VoiceInterviewer
+        candidateName="Guest User"
         userId="guest"
-        profileImage="/user-avatar.png"
-        type="generate"
+        mode="generate"
       />
-    </>
+    </div>
   );
 }
 

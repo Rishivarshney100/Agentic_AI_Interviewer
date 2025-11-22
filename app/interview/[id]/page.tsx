@@ -1,59 +1,62 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import Agent from "@/components/Agent";
+import VoiceInterviewer from "@/components/Agent";
 import { getRandomInterviewCover } from "@/lib/utils";
 
 import {
-  getFeedbackByInterviewId,
-  getInterviewById,
+  getEvaluationBySessionId,
+  getSessionById,
 } from "@/lib/actions/general.action";
-import DisplayTechIcons from "@/components/DisplayTechIcons";
+import TechnologyBadges from "@/components/DisplayTechIcons";
 
-const InterviewDetails = async ({ params }: RouteParams) => {
+const SessionDetails = async ({ params }: RouteParams) => {
   const { id } = await params;
 
-  const interview = await getInterviewById(id);
-  if (!interview) redirect("/");
+  const sessionData = await getSessionById(id);
+  if (!sessionData) redirect("/");
 
-  const feedback = await getFeedbackByInterviewId({
-    interviewId: id,
+  const evaluation = await getEvaluationBySessionId({
+    sessionId: id,
     userId: "guest",
   });
 
   return (
-    <>
-      <div className="flex flex-row gap-4 justify-between">
-        <div className="flex flex-row gap-4 items-center max-sm:flex-col">
+    <div className="flex flex-col items-center space-y-8">
+      <div className="w-full max-w-4xl bg-[#0f1e35] border border-[#1e3a5f] rounded-2xl p-6">
+        <div className="flex flex-row gap-6 justify-between items-center max-md:flex-col max-md:items-start">
           <div className="flex flex-row gap-4 items-center">
             <Image
               src={getRandomInterviewCover()}
               alt="cover-image"
-              width={40}
-              height={40}
-              className="rounded-full object-cover size-[40px]"
+              width={48}
+              height={48}
+              className="rounded-full object-cover size-[48px] border-2 border-purple-500"
             />
-            <h3 className="capitalize">{interview.role} Interview</h3>
+            <h2 className="capitalize text-2xl font-semibold text-white">
+              {sessionData.position} Interview
+            </h2>
           </div>
 
-          <DisplayTechIcons techStack={interview.techstack} />
+          <div className="flex gap-4 items-center">
+            <TechnologyBadges technicalStack={sessionData.technicalStack} />
+            <span className="bg-purple-600/20 text-purple-300 px-4 py-2 rounded-lg border border-purple-500/30 text-sm font-medium">
+              {sessionData.interviewType}
+            </span>
+          </div>
         </div>
-
-        <p className="bg-dark-200 px-4 py-2 rounded-lg h-fit">
-          {interview.type}
-        </p>
       </div>
 
-      <Agent
-        userName="Guest User"
+      <VoiceInterviewer
+        candidateName="Guest User"
         userId="guest"
-        interviewId={id}
-        type="interview"
-        questions={interview.questions}
-        feedbackId={feedback?.id}
+        sessionId={id}
+        mode="interview"
+        queryList={sessionData.queryList}
+        evaluationId={evaluation?.id}
       />
-    </>
+    </div>
   );
 };
 
-export default InterviewDetails;
+export default SessionDetails;
