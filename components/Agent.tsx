@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import { aiInterviewerConfig } from "@/constants";
-import { generateEvaluation } from "@/lib/actions/general.action";
 
 enum ConnectionState {
   IDLE = "IDLE",
@@ -25,7 +24,6 @@ const VoiceInterviewer = ({
   candidateName,
   userId,
   sessionId,
-  evaluationId,
   mode,
   queryList,
 }: VoiceAgentProps) => {
@@ -87,32 +85,14 @@ const VoiceInterviewer = ({
       setCurrentMessage(dialogHistory[dialogHistory.length - 1].content);
     }
 
-    const processSessionEvaluation = async (history: DialogEntry[]) => {
-      console.log("Processing session evaluation");
-
-      const { success, feedbackId: evalId } = await generateEvaluation({
-        sessionId: sessionId!,
-        userId: userId!,
-        conversationHistory: history,
-        evaluationId,
-      });
-
-      if (success && evalId) {
-        navigation.push(`/interview/${sessionId}/feedback`);
-      } else {
-        console.log("Failed to save evaluation");
-        navigation.push("/");
-      }
-    };
-
+    // When call ends, redirect to home
     if (connectionState === ConnectionState.TERMINATED) {
-      if (mode === "generate") {
+      console.log("✅ Interview completed! Redirecting to home...");
+      setTimeout(() => {
         navigation.push("/");
-      } else {
-        processSessionEvaluation(dialogHistory);
-      }
+      }, 1000); // Small delay to show the ended state
     }
-  }, [dialogHistory, connectionState, evaluationId, sessionId, navigation, mode, userId]);
+  }, [dialogHistory, connectionState, navigation]);
 
   const initiateConnection = async () => {
     setConnectionState(ConnectionState.ESTABLISHING);

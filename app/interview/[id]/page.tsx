@@ -3,11 +3,7 @@ import { redirect } from "next/navigation";
 
 import VoiceInterviewer from "@/components/Agent";
 import { getRandomInterviewCover } from "@/lib/utils";
-
-import {
-  getEvaluationBySessionId,
-  getSessionById,
-} from "@/lib/actions/general.action";
+import { getSessionById } from "@/lib/actions/general.action";
 import TechnologyBadges from "@/components/DisplayTechIcons";
 
 const SessionDetails = async ({ params }: RouteParams) => {
@@ -15,11 +11,6 @@ const SessionDetails = async ({ params }: RouteParams) => {
 
   const sessionData = await getSessionById(id);
   if (!sessionData) redirect("/");
-
-  const evaluation = await getEvaluationBySessionId({
-    sessionId: id,
-    userId: "guest",
-  });
 
   return (
     <div className="flex flex-col items-center space-y-8">
@@ -53,7 +44,6 @@ const SessionDetails = async ({ params }: RouteParams) => {
         sessionId={id}
         mode="interview"
         queryList={sessionData.queryList}
-        evaluationId={evaluation?.id}
       />
     </div>
   );
