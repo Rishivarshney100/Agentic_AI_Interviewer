@@ -199,7 +199,10 @@ const VoiceInterviewer = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             ) : (
-              <div className="flex gap-1">
+              <div className={cn(
+                "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1",
+                connectionState !== "ESTABLISHING" && "hidden"
+              )}>
                 <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
                 <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
                 <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
