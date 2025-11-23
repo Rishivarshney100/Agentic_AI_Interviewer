@@ -1,10 +1,24 @@
 <div align="center">
-  
-  <h1> MockAI</h1>
-  <p><strong>AI-Powered Voice Interview Platform</strong></p>
-  
-  <p>Practice job interviews with an intelligent AI voice agent. Get real-time feedback and land your dream job.</p>
+  <h1>
+    <bold>MockAI</bold><br>
+    <strong>AI-Powered Voice Interview Platform</strong>
+  </h1>
+</div>
 
+MockAI is a modern web application that leverages cutting-edge AI technology to provide realistic job interview practice sessions. Built with Next.js and powered by Vapi's AI agents, it offers an immersive interview experience with intelligent feedback powered by Google Gemini.
+
+### ✨ Key Features
+
+-  Real-Time Voice Interviews - Natural conversation flow with AI voice agents powered by Vapi
+-  AI-Generated Questions - Dynamic interview questions tailored to your role, experience level, and tech stack
+-  Multiple Interview Types - Support for technical, behavioral, and mixed interview formats
+-  Follow-Up Questions - AI agent takes follow-up questions based on the user response
+-  Real-Time Transcription - Live conversation tracking with transcript display
+-  Intelligent Feedback - Comprehensive Feedback summary with areas of improvement
+
+### 🏗️ Tech Stack
+
+<div align="center">
   <div>
     <img src="https://img.shields.io/badge/-Next.js_15-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=000000" alt="next.js" />
     <img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" />
@@ -16,33 +30,13 @@
 
 </div>
 
----
-
-## 🌟 Overview
-
-MockAI is a modern web application that leverages cutting-edge AI technology to provide realistic job interview practice sessions. Built with Next.js 15 and powered by Vapi's voice AI agents, it offers an immersive interview experience with intelligent feedback powered by Google Gemini.
-
-### ✨ Key Features
-
-- **🎙️ Real-Time Voice Interviews** - Natural conversation flow with AI voice agents powered by Vapi
-- **🤖 AI-Generated Questions** - Dynamic interview questions tailored to your role, experience level, and tech stack
-- **💼 Multiple Interview Types** - Support for technical, behavioral, and mixed interview formats
-- **🎨 Follow-Up Questions** - AI agent takes follow-up questions based on the user response
-- **⚡ Real-Time Transcription** - Live conversation tracking with transcript display
-- - **📊 Intelligent Feedback** - Comprehensive Feedback summary with areas of improvement
-
----
-
-## 🏗️ Architecture & Tech Stack
-
 ### Frontend
 - **Next.js 15** - React framework with App Router and Server Components
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling with custom design system
-- **shadcn/ui** - High-quality React components
 
 ### Backend & Services
-- **Firebase Admin SDK** - Authentication and Firestore database
+- **Firebase Admin SDK** - Firestore database for session id's (later can be used for authentication)
 - **Vapi AI** - Voice agent integration for natural conversations
 - **Google Gemini** - AI-powered interview question generation and feedback analysis
 - **Zod** - Runtime type validation
@@ -52,6 +46,10 @@ MockAI is a modern web application that leverages cutting-edge AI technology to 
 - `vapi-sdk` - Vapi voice agent SDK
 - `firebase-admin` - Firebase backend operations
 - `clsx` + `tailwind-merge` - Dynamic styling utilities
+
+---
+
+### 🛠️ Architecture and Worflows
 
 ---
 
