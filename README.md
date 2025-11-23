@@ -26,12 +26,10 @@ MockAI is a modern web application that leverages cutting-edge AI technology to 
 
 - **🎙️ Real-Time Voice Interviews** - Natural conversation flow with AI voice agents powered by Vapi
 - **🤖 AI-Generated Questions** - Dynamic interview questions tailored to your role, experience level, and tech stack
-- **📊 Intelligent Feedback** - Comprehensive analysis of communication skills, technical knowledge, and problem-solving
 - **💼 Multiple Interview Types** - Support for technical, behavioral, and mixed interview formats
-- **🎨 Modern UI/UX** - Sleek, responsive design with smooth animations and gradients
+- **🎨 Follow-Up Questions** - AI agent takes follow-up questions based on the user response
 - **⚡ Real-Time Transcription** - Live conversation tracking with transcript display
-- **📈 Performance Metrics** - Detailed scoring across multiple evaluation categories
-- **🔐 Secure Authentication** - Firebase-based user authentication and data management
+- - **📊 Intelligent Feedback** - Comprehensive Feedback summary with areas of improvement
 
 ---
 
