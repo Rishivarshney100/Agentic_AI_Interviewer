@@ -46,7 +46,25 @@ MockAI is a modern web application that leverages cutting-edge AI technology to 
 
 ---
 
-### 🛠️ Architecture and Worflows
+### 🛠️ Architecture (High-Level Design)
+<div align="center"><img width="754" height="800" alt="Screenshot 2025-11-23 at 17 21 26" src="https://github.com/user-attachments/assets/47827075-15bb-46f5-a9b8-015b74977858" /></div>
+
+### 🛠️ VAPI AI Worflow
+<div align="center"><img width="879" height="809" alt="Screenshot 2025-11-23 at 17 23 56" src="https://github.com/user-attachments/assets/8115ea76-b70b-431c-910b-60ed87dbbf27" /></div>
+
+---
+
+## 🎯 Usage
+
+### Interview Flow
+1. **Start Session** - User initiates interview with custom parameters (role, level, tech stack) asked by the AI agent
+2. **AI Conversation** - Natural voice interaction is conducted by Vapi AI agent
+3. **Real-Time Transcription** - Live conversation tracking and display using transcriber
+4. **End Interview** - Session completion with automatic feedback and areas of improvement
+
+### AI Integration
+- **Vapi Voice Agents** - Powered by OpenAI GPT-4o for natural language conversations
+- **Firebase** - Stores interview sessions and user data to generate feedback later on
 
 ---
 
@@ -138,74 +156,21 @@ ai_mock_interviews/
     ├── logo.svg          # Application logo
     └── tech.svg          # fallback icon
 ```
-
----
-
-## 🎯 Core Features Explained
-
-### Interview Flow
-1. **Start Session** - User initiates interview with custom parameters (role, level, tech stack)
-2. **AI Conversation** - Natural voice interaction with Vapi AI agent
-3. **Real-Time Transcription** - Live conversation tracking and display
-4. **End Interview** - Session completion with automatic feedback and areas of improvement
-
-### AI Integration
-- **Vapi Voice Agents** - Powered by OpenAI GPT-4o for natural language conversations
-- **Firebase** - Stores interview sessions and user data
-
-### Evaluation System
-Candidates are scored across five key areas:
-- 🗣️ **Communication Skills** - Clarity and articulation
-- 💻 **Technical Knowledge** - Understanding of concepts
-- 🧩 **Problem-Solving** - Analytical thinking
-- 🤝 **Cultural Fit** - Alignment with role expectations
-- 💪 **Confidence & Clarity** - Response quality
-
----
-
-## 🎨 Design System
-
-The application features a custom design system with:
-- **Dark Theme** - Modern dark mode UI
-- **Custom Color Palette** - Primary, success, destructive, and light variants
-- **Gradient Utilities** - Beautiful gradient backgrounds
-- **Responsive Design** - Mobile-first approach
-- **Smooth Animations** - Fade-in effects and transitions
-
 ---
 
 ## 🔧 Configuration
 
-### Vapi AI Setup
+### Vapi AI Setup (similar to N8N)
 1. Sign up at [Vapi AI](https://vapi.ai)
 2. Create a workflow for interview conversations
-3. Add your workflow ID and web token to `.env.local`
+3. Add workflow to a AI agent 
+4. Add your workflow ID and web token to `.env.local`
 
 ### Firebase Setup
 1. Create a project at [Firebase Console](https://console.firebase.google.com)
-2. Enable Firestore and Authentication
+2. Enable Firestore and create a database
 3. Download service account credentials
 4. Add configuration to `.env.local`
-
----
-
-## 🛠️ Development
-
-### Available Scripts
-
-```bash
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Run linter
-npm run lint
-```
 
 ---
 
