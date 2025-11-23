@@ -1,6 +1,6 @@
 <div align="center">
   
-  <h1>🎯 MockAI</h1>
+  <h1> MockAI</h1>
   <p><strong>AI-Powered Voice Interview Platform</strong></p>
   
   <p>Practice job interviews with an intelligent AI voice agent. Get real-time feedback and land your dream job.</p>
