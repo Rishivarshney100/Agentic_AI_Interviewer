@@ -5,7 +5,7 @@
   </h1>
 </div>
 
-MockAI is a modern web application that leverages cutting-edge AI technology to provide realistic job interview practice sessions. Built with Next.js and powered by Vapi's AI agents, it offers an immersive interview experience with intelligent feedback powered by Google Gemini.
+MockAI is a modern web application that leverages cutting-edge AI technology to provide realistic job interview practice sessions. Built with Next.js and powered by Vapi's voice AI agents with GPT-4o, it offers an immersive interview experience with real-time conversational intelligence.
 
 ### ✨ Key Features
 
@@ -25,7 +25,6 @@ MockAI is a modern web application that leverages cutting-edge AI technology to 
     <img src="https://img.shields.io/badge/-Vapi_AI-white?style=for-the-badge&color=5dfeca" alt="vapi" />
     <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
     <img src="https://img.shields.io/badge/-Firebase-black?style=for-the-badge&logoColor=white&logo=firebase&color=DD2C00" alt="firebase" />
-    <img src="https://img.shields.io/badge/-Google_Gemini-black?style=for-the-badge&logoColor=white&logo=google&color=4285F4" alt="gemini" />
   </div>
 
 </div>
@@ -37,13 +36,11 @@ MockAI is a modern web application that leverages cutting-edge AI technology to 
 
 ### Backend & Services
 - **Firebase Admin SDK** - Firestore database for session id's (later can be used for authentication)
-- **Vapi AI** - Voice agent integration for natural conversations
-- **Google Gemini** - AI-powered interview question generation and feedback analysis
+- **Vapi AI** - Voice agent integration powered by OpenAI GPT-4o
 - **Zod** - Runtime type validation
 
 ### Key Libraries
-- `@ai-sdk/google` - Google AI SDK integration
-- `vapi-sdk` - Vapi voice agent SDK
+- `@vapi-ai/web` - Vapi voice agent SDK
 - `firebase-admin` - Firebase backend operations
 - `clsx` + `tailwind-merge` - Dynamic styling utilities
 
@@ -82,9 +79,6 @@ Create a `.env.local` file in the root directory:
 # Vapi AI Configuration
 NEXT_PUBLIC_VAPI_WEB_TOKEN=your_vapi_web_token
 NEXT_PUBLIC_VAPI_WORKFLOW_ID=your_vapi_workflow_id
-
-# Google Gemini API
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
 
 # Application
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
@@ -156,8 +150,7 @@ ai_mock_interviews/
 4. **End Interview** - Session completion with automatic feedback and areas of improvement
 
 ### AI Integration
-- **Vapi Voice Agents** - Handle natural language conversations
-- **Google Gemini** - Generates contextual interview questions and analyzes responses
+- **Vapi Voice Agents** - Powered by OpenAI GPT-4o for natural language conversations
 - **Firebase** - Stores interview sessions and user data
 
 ### Evaluation System
@@ -193,10 +186,6 @@ The application features a custom design system with:
 2. Enable Firestore and Authentication
 3. Download service account credentials
 4. Add configuration to `.env.local`
-
-### Google Gemini Setup
-1. Get API key from [Google AI Studio](https://aistudio.google.com)
-2. Add to `.env.local`
 
 ---
 
