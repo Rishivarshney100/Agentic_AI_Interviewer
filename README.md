@@ -15,6 +15,7 @@ MockAI is a modern web application that leverages cutting-edge AI technology to 
 -  Follow-Up Questions - AI agent takes follow-up questions based on the user response
 -  Real-Time Transcription - Live conversation tracking with transcript display
 -  Intelligent Feedback - Comprehensive Feedback summary with areas of improvement
+-  Try Yourself: https://agentic-ai-interviewer-mauve.vercel.app/
 
 ### 🏗️ Tech Stack
 
