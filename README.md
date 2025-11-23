@@ -66,8 +66,7 @@ Ensure you have the following installed:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/ai_mock_interviews.git
-cd ai_mock_interviews
+git clone https://github.com/Rishivarshney100/Agentic_AI_Interviewer.git
 ```
 
 2. **Install dependencies**
@@ -126,8 +125,8 @@ ai_mock_interviews/
 │   ├── page.tsx          # Home page
 │   └── globals.css       # Global styles and design system
 ├── components/            # React components
-│   ├── Agent.tsx         # Voice agent interface
-│   └── DisplayTechIcons.tsx  # Technology badges
+│   ├── Agent.tsx         # Voice agent Workflow Usage
+│   └── DisplayTechIcons.tsx  # Icon Utility
 ├── lib/                   # Utilities and actions
 │   ├── actions/          # Server actions
 │   │   └── general.action.ts  # Interview & feedback logic
@@ -143,7 +142,7 @@ ai_mock_interviews/
 └── public/               # Static assets
     ├── covers/           # Interview cover images
     ├── logo.svg          # Application logo
-    └── tech.svg          # Technology fallback icon
+    └── tech.svg          # fallback icon
 ```
 
 ---
