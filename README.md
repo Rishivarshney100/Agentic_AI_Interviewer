@@ -34,6 +34,12 @@ IRIS.ai is a modern web application that leverages cutting-edge AI technology to
   </div>
 </div>
 
+### 🛠️ Architecture (High-Level Design)
+<div align="center"><img width="754" height="800" alt="Screenshot 2025-11-23 at 17 21 26" src="https://github.com/user-attachments/assets/47827075-15bb-46f5-a9b8-015b74977858" /></div>
+
+### 🛠️ VAPI AI Worflow
+<div align="center"><img width="879" height="809" alt="Screenshot 2025-11-23 at 17 23 56" src="https://github.com/user-attachments/assets/8115ea76-b70b-431c-910b-60ed87dbbf27" /></div>
+
 ### Frontend
 - **Next.js 15** - React framework with App Router and Server Components
 - **TypeScript** - Type-safe development
