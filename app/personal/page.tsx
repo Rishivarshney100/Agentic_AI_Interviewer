@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import VoiceInterviewer from "@/components/Agent";
-import Waveform from "@/components/Waveform";
 
 export default function PersonalPage() {
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
@@ -97,11 +96,6 @@ export default function PersonalPage() {
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                 </div>
               </div>
-            </div>
-
-            {/* Audio Visualization */}
-            <div className="mb-12">
-              <Waveform />
             </div>
 
             {/* Instructions */}
