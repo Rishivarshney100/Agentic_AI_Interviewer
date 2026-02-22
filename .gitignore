@@ -44,6 +44,7 @@ audio_processing.log
 .env.test.local
 .env.production.local
 .env*.local
+!.env.example
 
 # Vercel
 .vercel

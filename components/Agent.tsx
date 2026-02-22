@@ -26,26 +26,47 @@ const VoiceInterviewer = ({
   sessionId,
   mode,
   queryList,
-}: VoiceAgentProps) => {
+  autoStart = false,
+}: VoiceAgentProps & { autoStart?: boolean }) => {
   const navigation = useRouter();
   const [connectionState, setConnectionState] = useState<ConnectionState>(ConnectionState.IDLE);
   const [dialogHistory, setDialogHistory] = useState<DialogEntry[]>([]);
   const [agentSpeaking, setAgentSpeaking] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<string>("");
+  const [userTranscript, setUserTranscript] = useState<string>("");
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [startTime, setStartTime] = useState<number | null>(null);
 
   useEffect(() => {
     const handleConnectionEstablished = () => {
       setConnectionState(ConnectionState.CONNECTED);
+      setStartTime(Date.now());
     };
 
     const handleConnectionClosed = () => {
       setConnectionState(ConnectionState.TERMINATED);
+      setStartTime(null);
+      setElapsedTime(0);
     };
 
     const handleIncomingMessage = (msg: Message) => {
-      if (msg.type === "transcript" && msg.transcriptType === "final") {
-        const dialogEntry = { role: msg.role, content: msg.transcript };
-        setDialogHistory((previous) => [...previous, dialogEntry]);
+      if (msg.type === "transcript") {
+        if (msg.role === "user") {
+          // Show interim transcripts for user in real-time
+          if (msg.transcriptType === "partial") {
+            setUserTranscript(msg.transcript);
+          } else if (msg.transcriptType === "final") {
+            setUserTranscript(msg.transcript);
+            const dialogEntry = { role: msg.role, content: msg.transcript };
+            setDialogHistory((previous) => [...previous, dialogEntry]);
+          }
+        } else {
+          // Only add final transcripts for assistant
+          if (msg.transcriptType === "final") {
+            const dialogEntry = { role: msg.role, content: msg.transcript };
+            setDialogHistory((previous) => [...previous, dialogEntry]);
+          }
+        }
       }
     };
 
@@ -85,14 +106,64 @@ const VoiceInterviewer = ({
       setCurrentMessage(dialogHistory[dialogHistory.length - 1].content);
     }
 
-    // When call ends, redirect to home
+    // When call ends, redirect to personal page
     if (connectionState === ConnectionState.TERMINATED) {
-      console.log("✅ Interview completed! Redirecting to home...");
+      console.log("✅ Interview completed! Redirecting to personal page...");
       setTimeout(() => {
-        navigation.push("/");
+        navigation.push("/interview");
       }, 1000); // Small delay to show the ended state
     }
   }, [dialogHistory, connectionState, navigation]);
+
+  // Auto-start interview when autoStart prop is true
+  useEffect(() => {
+    if (autoStart && connectionState === ConnectionState.IDLE) {
+      const startInterview = async () => {
+        setConnectionState(ConnectionState.ESTABLISHING);
+        if (mode === "generate") {
+          await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+            variableValues: {
+              username: candidateName,
+              userid: userId,
+            },
+          });
+        } else {
+          let structuredQueries = "";
+          if (queryList) {
+            structuredQueries = queryList
+              .map((query) => `- ${query}`)
+              .join("\n");
+          }
+          await vapi.start(aiInterviewerConfig, {
+            variableValues: {
+              questions: structuredQueries,
+            },
+          });
+        }
+      };
+      startInterview();
+    }
+  }, [autoStart, connectionState, mode, candidateName, userId, queryList]);
+
+  // Real-time timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (startTime && connectionState === ConnectionState.CONNECTED) {
+      interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [startTime, connectionState]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   const initiateConnection = async () => {
     setConnectionState(ConnectionState.ESTABLISHING);
@@ -125,65 +196,93 @@ const VoiceInterviewer = ({
     vapi.stop();
   };
 
+  // Get the latest assistant message for display
+  const latestAssistantMessage = dialogHistory
+    .filter(entry => entry.role === "assistant")
+    .slice(-1)[0]?.content || "";
+
+  const latestUserMessage = dialogHistory
+    .filter(entry => entry.role === "user")
+    .slice(-1)[0]?.content || "";
+
   return (
     <div className="w-full flex flex-col items-center space-y-8">
-      {/* Interview Cards */}
-      <div className="grid grid-cols-2 gap-6 w-full max-w-4xl">
-        {/* AI Interviewer Card */}
-        <div className="relative bg-[#0f1e35] border border-[#1e3a5f] rounded-2xl p-12 flex flex-col items-center justify-center space-y-6 min-h-[320px] hover:border-[#2e4a6f] transition-all">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/50">
-              <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-                <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
-              </svg>
+      {/* Two Panels Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+        {/* AI Interviewer Panel */}
+        <div className="glassmorphism rounded-2xl p-8 border border-purple-500/30 card-glow-purple flex flex-col min-h-[150px]">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                  <circle cx="9" cy="10" r="1.5"/>
+                  <circle cx="15" cy="10" r="1.5"/>
+                  <path d="M12 14c-1.5 0-3 .5-3 1.5v1h6v-1c0-1-.5-1.5-3-1.5z"/>
+                </svg>
+              </div>
+              {agentSpeaking && (
+                <span className="absolute inset-0 w-12 h-12 rounded-xl border-2 border-purple-400 animate-ping" />
+              )}
             </div>
-            {agentSpeaking && (
-              <span className="absolute inset-0 w-32 h-32 rounded-full border-4 border-purple-400 animate-ping" />
+            <h3 className="text-2xl font-semibold text-white">AI Interviewer</h3>
+          </div>
+          
+          <div className="flex-1 flex flex-col justify-center">
+            {connectionState === "CONNECTED" ? (
+              <div className="space-y-4">
+                <p className="text-gray-400 text-lg mb-4">
+                  {agentSpeaking ? "Speaking..." : "Listening..."}
+                </p>
+                {latestAssistantMessage && (
+                  <div className="bg-white/5 rounded-lg p-4 border border-purple-500/20">
+                    <p className="text-white text-lg leading-relaxed">{latestAssistantMessage}</p>
+                    <div className="text-right mt-2 text-xs text-gray-400">{formatTime(elapsedTime)}</div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-lg">Waiting to start...</p>
             )}
           </div>
-          <h3 className="text-2xl font-semibold text-white">AI Interviewer</h3>
         </div>
 
-        {/* User Profile Card */}
-        <div className="relative bg-[#0f1e35] border border-[#1e3a5f] rounded-2xl p-12 flex flex-col items-center justify-center space-y-6 min-h-[320px] hover:border-[#2e4a6f] transition-all">
-          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-300 to-orange-400 flex items-center justify-center shadow-lg shadow-orange-400/50">
-            <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
+        {/* User Panel */}
+        <div className="glassmorphism rounded-2xl p-8 border border-blue-500/30 card-glow-blue flex flex-col min-h-[300px]">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <h3 className="text-2xl font-semibold text-white">You</h3>
           </div>
-          <h3 className="text-2xl font-semibold text-white">{candidateName}</h3>
+          
+          <div className="flex-1 flex flex-col justify-center">
+            {connectionState === "CONNECTED" ? (
+              <div className="space-y-4">
+                <p className="text-gray-400 text-lg mb-4">
+                  {userTranscript ? "Speaking..." : "Start voice response..."}
+                </p>
+                {(userTranscript || latestUserMessage) && (
+                  <div className="bg-white/5 rounded-lg p-4 border border-blue-500/20">
+                    <p className="text-white text-lg leading-relaxed">{userTranscript || latestUserMessage}</p>
+                    <div className="text-right mt-2 text-xs text-gray-400">{formatTime(elapsedTime)}</div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-lg">Ready to respond...</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Conversation Display */}
-      {dialogHistory.length > 0 && (
-        <div className="w-full max-w-2xl">
-          <div className="bg-[#0f1e35] border border-[#1e3a5f] rounded-xl px-8 py-4">
-            <p
-              key={currentMessage}
-              className={cn(
-                "text-gray-300 text-center transition-opacity duration-500 opacity-0",
-                "animate-fadeIn opacity-100"
-              )}
-            >
-              {currentMessage}
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Call to Action */}
       <div className="flex flex-col items-center space-y-6">
-        {connectionState === "IDLE" && !dialogHistory.length && (
-          <p className="text-gray-400 text-lg">
-            Alright, {candidateName.split(' ')[0]}. Should we start ?
-          </p>
-        )}
-        
         {connectionState !== "CONNECTED" ? (
           <button 
-            className="group relative px-10 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-lg font-semibold rounded-full shadow-lg shadow-green-500/50 transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative px-12 py-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white text-lg font-semibold rounded-full shadow-lg shadow-blue-500/50 transition-all transform hover:scale-105 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => initiateConnection()}
             disabled={connectionState === "ESTABLISHING"}
           >
@@ -211,7 +310,7 @@ const VoiceInterviewer = ({
           </button>
         ) : (
           <button 
-            className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white text-lg font-semibold rounded-full shadow-lg shadow-red-600/50 transition-all"
+            className="px-12 py-4 bg-red-600 hover:bg-red-700 text-white text-lg font-semibold rounded-full shadow-lg shadow-red-600/50 transition-all transform hover:scale-105"
             onClick={() => terminateConnection()}
           >
             End Interview
